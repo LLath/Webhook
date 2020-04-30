@@ -1,13 +1,11 @@
 const http = require("http");
 const crypto = require("crypto");
 
-const SECRET = "";
-
 http
   .createServer((req, res) => {
     req.on("data", (chunk) => {
       const signature = `sha1=${crypto
-        .createHmac("sha1", SECRET)
+        .createHmac("sha1", process.env.SECRET)
         .update(chunk)
         .digest("hex")}`;
 
@@ -20,7 +18,8 @@ http
       if (isAllowed && isMaster) {
         console.log("You pushed something important");
       }
+      console.log("Was mach ich");
     });
     res.end();
   })
-  .listen(8080);
+  .listen(7777);
