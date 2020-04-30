@@ -15,7 +15,7 @@ http
 
       const body = JSON.parse(chunk);
 
-      const isMaster = body?.ref === "refs/heads/master";
+      const isMaster = body.ref === "refs/heads/master";
 
       if (isAllowed && isMaster) {
         console.log("You pushed something important");
