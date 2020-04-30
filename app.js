@@ -1,6 +1,8 @@
+require("dotenv").config();
 const http = require("http");
 const crypto = require("crypto");
 
+console.log(process.env.SECRET);
 http
   .createServer((req, res) => {
     req.on("data", (chunk) => {
