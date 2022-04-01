@@ -23,7 +23,9 @@ handler.on("push", function (event) {
     event.payload.repository.name,
     event.payload.ref
   );
-  exec("cd ~/git/DWP/ && git pull && yarn && pm2 restart bot");
+  exec("cd ~/git/DWP/ && git pull && yarn && pm2 restart bot", () => {
+    console.log("Executed script");
+  });
 });
 
 handler.on("issues", function (event) {
