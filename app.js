@@ -2,7 +2,7 @@ require("dotenv").config();
 var http = require("http");
 var createHandler = require("github-webhook-handler");
 var handler = createHandler({ path: "/webhook", secret: process.env.SECRET });
-const { exec } = require("child_process");
+const { exec, execSync } = require("child_process");
 
 http
   .createServer(function (req, res) {
@@ -23,15 +23,16 @@ handler.on("push", function (event) {
     event.payload.repository.name,
     event.payload.ref
   );
-  const command = `cd ~/git/DWP/
-  git pull
-  yarn
-  pm2 restart bot
+  const command = `git pull | yarn | pm2 restart bot
   `;
-  exec(command, (err, stdout, stderr) => {
-    if (err) console.error(err);
-    console.log("Executed script", stdout);
-  });
+  execSync(
+    command,
+    { cwd: "process.env.HOME/git/DWP/" },
+    (err, stdout, stderr) => {
+      if (err) console.error(err);
+      console.log("Executed script", stdout);
+    }
+  );
 });
 
 handler.on("issues", function (event) {
