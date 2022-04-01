@@ -23,8 +23,14 @@ handler.on("push", function (event) {
     event.payload.repository.name,
     event.payload.ref
   );
-  exec("cd ~/git/DWP/ && git pull && yarn && pm2 restart bot", () => {
-    console.log("Executed script");
+  const command = `cd ~/git/DWP/
+  git pull
+  yarn
+  pm2 restart bot
+  `;
+  exec(command, (err, stdout, stderr) => {
+    if (err) console.error(err);
+    console.log("Executed script", stdout);
   });
 });
 
