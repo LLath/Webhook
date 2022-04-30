@@ -1,8 +1,14 @@
 require("dotenv").config();
-var http = require("http");
-var createHandler = require("github-webhook-handler");
-var handler = createHandler({ path: "/webhook", secret: process.env.SECRET });
-const { exec, execSync } = require("child_process");
+const http = require("http");
+const createHandler = require("node-github-webhook");
+const { execSync } = require("child_process");
+
+const handlerOptions = [
+  { path: "/webhook", secret: process.env.SECRET },
+  { path: "/serverwebhook", secret: process.env.SECRET_DWP_SERVER },
+];
+
+const handler = createHandler(handlerOptions);
 
 http
   .createServer(function (req, res) {
@@ -18,29 +24,36 @@ handler.on("error", function (err) {
 });
 
 handler.on("push", function (event) {
-  console.log(
-    "Received a push event for %s to %s",
-    event.payload.repository.name,
-    event.payload.ref
-  );
-  const command = `git pull | yarn | pm2 restart bot
-  `;
-  execSync(
-    command,
-    { cwd: "process.env.HOME/git/DWP/" },
-    (err, stdout, stderr) => {
-      if (err) console.error(err);
-      console.log("Executed script", stdout);
-    }
-  );
-});
+  console.log(`Received push from ${event.path}`);
+  let command;
 
-handler.on("issues", function (event) {
-  console.log(
-    "Received an issue event for %s action=%s: #%d %s",
-    event.payload.repository.name,
-    event.payload.action,
-    event.payload.issue.number,
-    event.payload.issue.title
-  );
+  switch (event.path) {
+    case "webhook":
+      command = `git pull | yarn | pm2 restart bot
+      `;
+      execSync(
+        command,
+        { cwd: "process.env.HOME/git/DWP/" },
+        (err, stdout, stderr) => {
+          if (err) console.error(err);
+          console.log("Executed script", stdout);
+        }
+      );
+      break;
+    case "serverwebhook":
+      command = `git pull | npm ci | pm2 restart bot
+      `;
+      execSync(
+        command,
+        { cwd: "process.env.HOME/git/dwp_server/" },
+        (err, stdout, stderr) => {
+          if (err) console.error(err);
+          console.log("Executed script", stdout);
+        }
+      );
+      break;
+
+    default:
+      break;
+  }
 });
